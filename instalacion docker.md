@@ -47,6 +47,40 @@ B. Paso 1:
 
 <img width="917" height="546" alt="PASO 1" src="https://github.com/user-attachments/assets/1224be76-e22a-492b-9ebd-b762077149b7" />
 
+Paso 2: 
+
+Se crea el dockerfile y se ejecuta el comando para visualizar el robot
+
+<img width="1340" height="692" alt="Captura" src="https://github.com/user-attachments/assets/085ec7a8-58fd-4927-9442-f4f72ce2f92c" />
+
+<img width="1354" height="703" alt="gazebo" src="https://github.com/user-attachments/assets/6cca2cdf-2e47-44bd-8aac-5b6d7452ace4" />
+
+Segundo punto:
+
+<img width="1313" height="666" alt="123123" src="https://github.com/user-attachments/assets/334a03b1-16ae-40c7-b481-a2ffb143fb04" />
+
+<img width="1361" height="708" alt="wireshark" src="https://github.com/user-attachments/assets/59c8b0a8-f951-4d45-ba34-22ce35197911" />
+
+El contenedor que inicia la comunicación envía una trama ARP broadcast para descubrir la dirección MAC asociada a la IP destino. Luego el contenedor destino responde con su dirección MAC, permitiendo que se establezca la comunicación IP.
+
+La solicitud ARP se envía a la dirección MAC broadcast ff:ff:ff:ff:ff:ff, para que todos los dispositivos de la red reciban la petición y el que posea la IP solicitada responda con su dirección MAC.
+
+La respuesta ARP es unicast, porque se envía directamente a la dirección MAC del host que realizó la solicitud.
+
+ARP es necesario para resolver la dirección MAC asociada a una dirección IP dentro de una red local, permitiendo que los dispositivos puedan enviarse tramas Ethernet. Después del intercambio, la caché ARP almacena la asociación entre la dirección IP y la dirección MAC del dispositivo destino, junto con la interfaz de red correspondiente.
+
+Punto 3
+
+Durante la prueba se enviaron 10 paquetes ICMP Echo Request desde contenedor1 hacia contenedor2. Cada solicitud fue respondida con un Echo Reply, permitiendo medir el RTT (Round Trip Time). El RTT representa el tiempo que tarda un paquete en ir desde el origen hasta el destino y regresar, y puede observarse en la columna Time de Wireshark.
+
+El RTT promedio se calcula sumando los tiempos de ida y vuelta de los paquetes ICMP y dividiéndolos entre el número total de paquetes. En la prueba se observa una ligera variación entre los RTT debido a factores como el procesamiento del sistema y la virtualización, aunque los valores se mantienen muy bajos al tratarse de comunicación dentro de la misma red local.
+
+La latencia es el tiempo que tarda un paquete de datos en viajar entre dos dispositivos en una red. Puede verse afectada por factores como la distancia, la congestión de la red, el procesamiento en dispositivos intermedios y el ancho de banda disponible. El jitter es la variación en el tiempo de llegada de los paquetes y es especialmente importante en aplicaciones en tiempo real como VoIP o videojuegos, ya que puede causar interrupciones o pérdida de calidad en la comunicación.
+
+
+
+
+
 
 
 
