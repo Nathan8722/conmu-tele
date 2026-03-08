@@ -1,5 +1,4 @@
 # conmu-tele
-conmutacion
 
 Parcial 1
 
