@@ -4,7 +4,7 @@ Paso 1.
 
 Actualizar el sistema
 
-Primero abrimos la terminal y actualizamos los paquetes:
+Primero abrimos la terminal y actualizamos los paquetes: 
 
 sudo apt update
 sudo apt upgrade -y
