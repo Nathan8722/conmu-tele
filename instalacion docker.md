@@ -1,4 +1,6 @@
-# Instalacion docker
+# Taller 1 e Instalacion docker
+
+Punto 1
 
 1. Actualizar el sistema
 
@@ -35,6 +37,16 @@
 5. Verificar la instalación
 
    <img width="1279" height="659" alt="10" src="https://github.com/user-attachments/assets/a7bbd598-e122-4798-a118-6b8c42f35200" />
+
+
+A. Al ejecutar el comando se puede visualizar un video obtenido de docker en el que se muestra un conteo regresivo mediante el formato ascii
+
+<img width="1284" height="666" alt="11" src="https://github.com/user-attachments/assets/7af60281-31ad-4f90-808a-a355714ba9be" />
+
+B. Paso 1: 
+
+<img width="917" height="546" alt="PASO 1" src="https://github.com/user-attachments/assets/1224be76-e22a-492b-9ebd-b762077149b7" />
+
 
 
 
