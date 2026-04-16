@@ -1,8 +1,8 @@
-## EJERCICIO EN CLASE 
+## Ejercicio en  clase
 
-## SEGUNDO CORTE
+## Segundo corte
 
-## EVIDENCIAS EJECUCION DE CODIGO
+## Evidencias ejecucion de codigo
 
 ## Linea 1
 
@@ -32,9 +32,32 @@
 
 <img width="487" height="107" alt="image" src="https://github.com/user-attachments/assets/ce54e8bb-cb2d-4d2d-b307-b8c25e515e2a" />
 
-## Analisis
+## Analisis forense con wireshark
 
 Análisis del archivo descarga_tcp.pcap
+
+Filtrado de trafico
+
+tcp.flags.syn == 1
+
+<img width="1912" height="625" alt="image" src="https://github.com/user-attachments/assets/e1b3d759-0f28-4889-958a-4aa2c3480510" />
+
+tcp.analysis.retransmission
+
+<img width="1915" height="660" alt="image" src="https://github.com/user-attachments/assets/4eca9773-3105-4ac3-8511-49b04bec32d5" />
+
+tcp.port == 443
+
+
+
+
+
+
+
+
+
+
+
 
 
 
