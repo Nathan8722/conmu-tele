@@ -48,7 +48,7 @@ tcp.analysis.retransmission
 
 Preguntas:
 
-¿Qué es YOLO?, ¿cúales son sus características principales? Y ¿Qué arquitectura tiene?
+## ¿Qué es YOLO?, ¿cúales son sus características principales? Y ¿Qué arquitectura tiene?
 
 YOLO es un modelo de detección de objetos que, a diferencia de enfoques anteriores que escaneaban una imagen múltiples veces, procesa la imagen completa en una sola pasada por la red neuronal. Esto lo hace extremadamente rápido y eficiente.
 
@@ -74,7 +74,7 @@ La arquitectura general de YOLO se divide en tres grandes bloques:
 3. Head (cabeza de detección) — En versiones modernas (YOLOv8+) usa cabezas desacopladas (decoupled heads): una rama para clasificar el objeto y otra para predecir la bounding box. Esto mejora la precisión respecto a versiones anteriores que lo hacían en una sola rama.
 Finalmente, se aplica NMS (Non-Maximum Suppression) para eliminar detecciones duplicadas y quedarse solo con las más confiables.
 
-Protocolo vs. Aplicación
+## Protocolo vs. Aplicación
 
 TCP es ideal por sus características fundamentales:
 
@@ -86,9 +86,7 @@ Orden garantizado: Los segmentos se reensamblan en el orden correcto, sin import
 
 Control de flujo y congestión: Ajusta la velocidad de envío según la capacidad del receptor y de la red.
 
-
 En el ejercicio esto se observa con el filtro tcp.analysis.retransmission: si aparece algún paquete retransmitido, TCP lo detectó y lo reenvió automáticamente sin que el usuario lo notara, garantizando la integridad del archivo.
-
 
 ¿Por qué la transmisión de video simulada usa UDP?
 
@@ -109,6 +107,18 @@ Cabecera ligera: UDP tiene solo 8 bytes de cabecera frente a los 20+ bytes de TC
 La elección del protocolo depende de la naturaleza de la tarea: cuando los datos deben ser perfectos (como un modelo de IA que no funciona si está incompleto), se sacrifica velocidad por fiabilidad usando TCP. 
 
 Cuando el tiempo real es prioritario y una pérdida ocasional es tolerable (como un fotograma de video), se sacrifica fiabilidad por velocidad usando UDP.
+
+## Fiabilidad vs. Velocidad:
+
+La única retransmisión detectada es evidencia directa de TCP funcionando correctamente: detectó un problema de red, lo resolvió en fracciones de segundo y garantizó que el modelo llegara íntegro. 
+
+Para video en vivo, ese mismo mecanismo sería contraproducente, ya que prioriza la perfección sobre la continuidad temporal, exactamente lo opuesto a lo que necesita un stream en tiempo real.
+
+## Identificando el Origen:
+
+El uso de ip.src, ip.dst e ip.addr en Wireshark permite verificar con precisión el tráfico de red. 
+
+En este ejercicio, estos filtros transforman una captura con cientos de paquetes mezclados en una vista que muestra exclusivamente la conversación entre Google Colab y el servidor que entregó yolov8n.pt, evidenciando en detalle cómo TCP garantizó que cada byte del modelo llegara correctamente para su uso posterior en inferencia.
 
 
 
