@@ -31,14 +31,13 @@ Dirección IP de Destino: La identidad del receptor.
 Puerto de Origen: El puerto efímero o de servicio desde el cual se inicia la conexión.
 
 Puerto de Destino: El puerto que identifica el servicio que se está accediendo.
-
 Protocolo IP: El número que identifica el protocolo de la capa de transporte (por ejemplo, 6 para TCP o 17 para UDP).
 
 los puertos a utilizar son:
 
 HTTP: Puerto 80 (TCP).
 
-Para tráfico web seguro (HTTPS), se debe inspeccionar el puerto 443 (TCP).
+Para tráfico web seguro (HTTPS), se debe usar el puerto 443 (TCP).
 
 SSH: Puerto 22 (TCP).
 
