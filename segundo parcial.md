@@ -71,4 +71,49 @@ La arquitectura se divide en tres capas principales:
 
 <img width="1387" height="747" alt="image" src="https://github.com/user-attachments/assets/7bd75d6b-d1b8-48d7-ab79-752a0d884849" />
 
+Maquina Virtual
+
+Descripcion:
+
+Esquema de la arquitectura
+
+El Sensor (Captura y Pre-proceso)
+
+**Origen**: El navegador captura el video de la cámara local (JS) y lo inyecta al entorno de ejecución.
+**Ingesta**: El script de Python en el contenedor Docker recibe los datos y usa OpenCV para preparar los cuadros (frames) para la IA.
+
+El Cerebro (Detección YOLOv8)
+
+**Inferencia**: El motor YOLOv8 analiza cada frame buscando patrones de peatones y vehículos.
+**Acción**: El script genera el video anotado y envía los resultados (alertas o video) hacia un servidor externo a través de la red.
+
+El Auditor (Observabilidad NetFlow)
+
+**Exportación**: Una VM con softflowd "escucha" el tráfico que sale del contenedor sin interrumpirlo.
+
+**Análisis**: Agrupa los paquetes en flujos (NetFlow) y envía esa telemetría a un colector para monitorear el consumo de ancho de banda y el rendimiento del enlace.
+
+<img width="1382" height="745" alt="image" src="https://github.com/user-attachments/assets/58721e41-2496-409f-b51c-5842a784dc4f" />
+
+Descripcion:
+
+Esquema de la arquitectura:
+
+Generación (IA)
+Entrada: Video de la webcam (vía JS/Colab).
+
+**Proceso**: Contenedor Docker con YOLOv8 detecta peatones y vehículos.
+
+**Salida**: Resultados de detección enviados por red.
+
+Telemetría (Red)
+**Captura**: La VM con softflowd intercepta el tráfico del contenedor.
+**Exportación**: Convierte los paquetes en registros NetFlow y los envía al colector.
+
+Visualización (Dashboard)
+Recolección: Un script de Python (Colector) recibe y organiza los flujos.
+
+Dashboard: Streamlit/Matplotlib muestra en tiempo real los "Top Talkers" y el consumo de ancho de banda.
+
+<img width="1377" height="740" alt="image" src="https://github.com/user-attachments/assets/603955a7-9a1c-4ec9-a663-1e0545ab51dd" />
 
