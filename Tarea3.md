@@ -40,11 +40,11 @@ La comunicación se transmite a través de una red en los medios. El medio propo
 
 Las redes modernas utilizan principalmente tres tipos de medios para interconectar dispositivos:
 
-    Hilos metálicos dentro de cables – Los datos se codifican en impulsos eléctricos.
+- Hilos metálicos dentro de cables – Los datos se codifican en impulsos eléctricos.
 
-    Fibras de vidrio o plástico (cable de fibra óptica) – Los datos se codifican como pulsos de luz.
+- Fibras de vidrio o plástico (cable de fibra óptica) – Los datos se codifican como pulsos de luz.
 
-    Transmisión inalámbrica – Los datos se codifican a través de la modulación de frecuencias específicas de ondas electromagnéticas.
+- Transmisión inalámbrica – Los datos se codifican a través de la modulación de frecuencias específicas de ondas electromagnéticas.
 
 ### Modulo 7
 
@@ -146,17 +146,35 @@ Cuando se envía un mensaje utilizando TCP o UDP, los protocolos y servicios sol
 
 ### Modulo 16
 
-La Relación Cliente Servidor
+- La Relación Cliente Servidor
 
-    Servicios de Aplicaciones de Red
+- Servicios de Aplicaciones de Red
 
-    Sistema de Nombres de Dominios
+- Sistema de Nombres de Dominios
 
-    Clientes y Servidores Web
+- Clientes y Servidores Web
 
-    Clientes y Servidores FTP
+- Clientes y Servidores FTP
 
-    Terminales Virtuales
+- Terminales Virtuales
 
-    Correo Electrónico y Mensajería
+- Correo Electrónico y Mensajería
+
+### Modulo 17
+
+Comandos de solución de problemas
+
+Hay disponibles varios programas de utilidad de software que pueden ayudar a identificar problemas de red. El sistema operativo proporciona la mayoría de estas utilidades como comandos CLI.
+
+Éstas son algunas de las utilidades disponibles:
+
+- ipconfig - Muestra información de la configuración IP
+
+- ping - Prueba las conexiones con otros hosts IP
+
+- netstat - Muestra las conexiones de red
+
+- tracert - Muestra la ruta exacta recorrida hasta el destino
+
+- nslookup - Directamente solicita al servidor de nombres información sobre un dominio de destino
 
