@@ -334,4 +334,32 @@ Traffic Shaping en el Switch Virtual
 
 Dado que usas Open vSwitch o un Linux Bridge, puedes aplicar políticas de QoS (Quality of Service) para priorizar los paquetes UDP de video sobre el tráfico de metadata TCP o tráfico de gestión.
 
+Para medir el tráfico a nivel de contenedor utilizando NetFlow y técnicas de contabilidad IP, es fundamental entender que, en entornos virtualizados o de orquestación (como Docker o Kubernetes), cada contenedor suele identificarse por una IP única dentro de una red puente (bridge) o una superposición (overlay).
+
+A continuación, se detalla la configuración de la regla y el método de detección.
+1. Regla NetFlow (5-tuple) para Contenedores
+
+En el estándar NetFlow, el flujo se define por una combinación de campos clave. Para medir el tráfico de un contenedor específico, la regla 5-tuple debe capturar la identidad de red del contenedor y la naturaleza de su conexión.
+Definición de la Regla
+
+Para monitorear un contenedor, la 5-tuple se compone de:
+
+    Source IP: La dirección IP asignada al contenedor.
+
+    Destination IP: La IP del servicio o host con el que se comunica.
+
+    Source Port: El puerto de origen de la aplicación del contenedor.
+
+    Destination Port: El puerto de destino (ej. 80 para HTTP, 443 para HTTPS).
+
+    Protocol: El protocolo de transporte (TCP o UDP).
+
+    Lógica de medición: Si el tráfico coincide con estos cinco campos, NetFlow lo agrupa en un "flow record" y suma los bytes y              paquetes. Al filtrar por la Source IP del contenedor, obtienes el tráfico de salida total.
+
+2. Detección de Consumo con IP Accounting
+
+El IP Accounting es una función más ligera que NetFlow, ideal para ver rápidamente quién está consumiendo más ancho de banda en una interfaz específica (como la interfaz virtual veth de un contenedor o el bridge principal).
+
+
+
 
