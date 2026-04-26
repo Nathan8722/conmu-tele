@@ -117,3 +117,221 @@ Dashboard: Streamlit/Matplotlib muestra en tiempo real los "Top Talkers" y el co
 
 <img width="1377" height="740" alt="image" src="https://github.com/user-attachments/assets/603955a7-9a1c-4ec9-a663-1e0545ab51dd" />
 
+
+Colector netflow
+
+Descripcion:
+
+Esquema de la arquitectura
+
+En un entorno real, el flujo de datos sigue este orden:
+
+Exportador (Router/Switch): Envía paquetes UDP (puerto 2055) con registros de tráfico.
+
+    Colector (Colab): Un script de Python abre un socket UDP, decodifica los encabezados de NetFlow y almacena los datos en un DataFrame     de Pandas.
+
+    Visualización: Un hilo secundario toma los datos del colector y actualiza un gráfico de barras o líneas.
+
+Implementación del Colector y Dashboard
+
+Dado que en Colab no solemos tener un router físico enviando datos reales a la IP efímera de Google, incluiremos un Generador de Tráfico Sintético para que puedas ver el dashboard en funcionamiento inmediatamente.
+
+Explicación de los Componentes
+
+Socket UDP vs. Hilo de Simulación: En una red local, usarías socket.socket(socket.AF_INET, socket.SOCK_DGRAM) para recibir datos de un dispositivo Cisco o Huawei. Aquí usamos un hilo (threading) para poblar una lista compartida y no bloquear la ejecución del dashboard.
+
+Pandas Integration: Es la mejor forma de procesar NetFlow, ya que permite agrupar datos por IP de origen, destino o puertos de forma casi instantánea.
+
+Matplotlib/Seaborn: Se encargan de la capa de presentación. Usamos clear_output(wait=True) para simular una actualización en vivo, lo cual es la forma más eficiente de crear dashboards dentro de una celda de Jupyter sin necesidad de desplegar un servidor web externo.
+
+<img width="1054" height="544" alt="imagen" src="https://github.com/user-attachments/assets/433f4d14-c890-4987-92e3-04b71d1d0cae" />
+
+# Preguntas de Diseño #
+
+Para lograr que el tráfico de detecciones de un contenedor YOLO sea capturado y muestreado por NetFlow, necesitamos que los paquetes atraviesen un punto de control (un switch virtual o el stack de red del host) donde un "Exportador" de NetFlow pueda observar el flujo.
+
+Arquitectura de Red: El "Punto de Observación"
+
+Para que NetFlow funcione, el tráfico no puede ser interno del contenedor (IPC); debe salir hacia la red de la VM. La mejor forma de estructurarlo es tratar al contenedor como un host de red independiente conectado a un Bridge Virtual en la VM.
+Componentes clave:
+
+- Contenedor (YOLO): Envía las detecciones (vía JSON, MQTT, o gRPC) hacia una IP de destino.
+
+- Interfaz Virtual (veth): El "cable" que une al contenedor con el stack de la VM.
+
+- Exportador NetFlow: Un software en la VM (como ipt-netflow, Softflowd o Open vSwitch) que escucha en esa interfaz.
+
+Estrategias de Implementación
+
+Usar Softflowd
+
+softflowd es un exportador de NetFlow por software que puede escuchar en una interfaz específica de la VM y enviar los datos a un colector.
+
+    Identificar la interfaz: Docker suele usar docker0.
+
+    Ejecutar el sensor:
+    Bash
+
+    sudo softflowd -i docker0 -n 127.0.0.1:2055
+
+    Aquí, softflowd captura el tráfico que sale de YOLO por la interfaz bridge y lo envía al puerto 2055 (donde estaría tu colector NetFlow).
+
+Para medir el tráfico específicamente entre la subred del contenedor (donde vive YOLO) y la interfaz de la VM, lo ideal es utilizar nftables. Es el sucesor moderno de iptables y permite definir contadores de forma mucho más limpia y eficiente.
+
+Asumiremos que la subred de tus contenedores es 172.17.0.0/16 (la habitual de Docker) y que la IP de la VM en el bridge es 172.17.0.1.
+1. Propuesta con nftables (Recomendado)
+
+Esta regla crea un "contador" específico para el tráfico que entra y sale del contenedor hacia la VM. La ventaja es que puedes consultar solo estos contadores sin navegar por todo el log del sistema.
+Configuración de la regla:
+Bash
+
+# 1. Crear una tabla para contabilidad
+nft add table inet accounting
+
+# 2. Crear una cadena que intercepte el tráfico forward y local
+nft add chain inet accounting detections { type filter hook input priority 0 \; }
+nft add chain inet accounting output_det { type filter hook output priority 0 \; }
+
+# 3. Agregar los contadores específicos para la subred de YOLO
+nft add rule inet accounting detections ip saddr 172.17.0.0/16 counter
+nft add rule inet accounting output_det ip daddr 172.17.0.0/16 counter
+
+Cómo consultar los datos:
+
+Para ver cuántos bytes y paquetes han generado las detecciones, simplemente ejecuta:
+Bash
+
+nft list table inet accounting
+
+Esto te devolverá algo como: ip saddr 172.17.0.0/16 counter packets 1542 bytes 124043.
+2. Propuesta con iptables (Legacy)
+
+Si prefieres el método clásico, puedes insertar reglas en las cadenas de INPUT y OUTPUT. Al no definir un "target" (como ACCEPT o DROP), la regla actúa puramente como un contador de paquetes que pasan por ella.
+Configuración de la regla:
+Bash
+
+# Contar tráfico entrante desde el contenedor YOLO a la VM
+iptables -A INPUT -s 172.17.0.0/16 -d 172.17.0.1 -m comment --comment "CONTADOR_YOLO_IN"
+
+# Contar tráfico saliente desde la VM al contenedor (ACKs, comandos)
+iptables -A OUTPUT -d 172.17.0.0/16 -s 172.17.0.1 -m comment --comment "CONTADOR_YOLO_OUT"
+
+Cómo consultar los datos:
+
+Para visualizar el tráfico acumulado:
+Bash
+
+iptables -L -v -n | grep "CONTADOR_YOLO"
+
+La columna pkts y bytes te dará la medición exacta del tráfico de detección.
+3. Integración con NetFlow
+
+Para que estas mediciones no se queden solo en la consola y se exporten como flujos (NetFlow/IPFIX), te sugiero usar el módulo ipt-netflow.
+
+Si lo instalas, la "regla" de accounting se convierte en una regla de exportación:
+Bash
+
+iptables -A FORWARD -s 172.17.0.0/16 -j NETFLOW
+
+Esto enviará automáticamente la información de accounting (IP origen, IP destino, puertos, bytes) hacia tu colector configurado en el /proc/net/stat/ipt_netflow.
+Resumen de diferencias
+
+    Contadores (iptables/nftables): Útiles para saber el "cuánto" (volumen total de datos).
+
+    NetFlow: Útil para saber el "cómo" y "cuándo" (gráficas de ráfagas de detección, picos de latencia, destinos frecuentes).
+
+Flujo de datos
+
+<img width="1138" height="622" alt="imagen" src="https://github.com/user-attachments/assets/40dc4c97-3d01-4653-8fbb-7608fbda4d6a" />
+
+2. b
+
+Una estación de trenes requiere monitoreo con cinco cámaras, cada una especializada:
+
+<img width="1131" height="609" alt="imagen" src="https://github.com/user-attachments/assets/d382e2cb-27e6-4423-b7c0-8f681d2a03f4" />
+
+Diagrama de Arquitectura
+
+<img width="1139" height="612" alt="imagen" src="https://github.com/user-attachments/assets/c544e94b-ff9b-4af5-80ed-a1c4038d05df" />
+
+Para calcular el throughput, debemos definir los parámetros de calidad del video (input) y la densidad de los mensajes de detección (output). Basándonos en estándares de videovigilancia y comunicación gRPC/JSON, aquí tienes el desglose técnico:
+
+1. Parámetros de Entrada (Video UDP)
+
+Asumiremos un estándar de alta definición para el análisis de IA:
+
+    Resolución: 1080p (Full HD).
+
+    Codec: H.264 / H.265.
+
+    FPS (Frames por segundo): 15 fps (suficiente para analítica).
+
+    Bitrate estimado: 4 Mbps por flujo de cámara.
+
+2. Parámetros de Salida (Metadata TCP)
+
+La metadata varía según la complejidad de la escena:
+
+    Payload promedio: 2 KB por detección (JSON con coordenadas, etiquetas y timestamps).
+
+    Frecuencia: 5 detecciones por segundo (promedio).
+
+    Cálculo: 2KBX8X5 DET/S=80Kbps=0.08Mbps
+
+Tabla de Throughput por Contenedor
+
+Contenedor,Función,Video (In),Metadata (Out),Total Unitario
+C1,Placas (OCR),4 Mbps,0.10 Mbps*,4.10 Mbps
+C2,Parqueadero,4 Mbps,0.05 Mbps,4.05 Mbps
+C3,Aforo (Personas),4 Mbps,0.15 Mbps**,4.15 Mbps
+C4,Animales,4 Mbps,0.05 Mbps,4.05 Mbps
+C5,Objetos perdidos,4 Mbps,0.08 Mbps,4.08 Mbps
+
+Cálculo del Throughput Total
+
+Para obtener el impacto total en el Switch Virtual y las VMs, sumamos todos los flujos:
+
+<img width="416" height="94" alt="imagen" src="https://github.com/user-attachments/assets/261a0899-9511-4a8e-9039-867473df0b8c" />
+
+Total Video (UDP): 5x4Mbps= 20Mbps
+Total Metadata (TCP): 0.10+0.05+0.15+0.05+0.08=0.43Mbps
+
+Resumen de Resultados
+
+    Throughput por Contenedor (Promedio): 4.086 Mbps
+
+    Throughput Total del Sistema: 20.43 Mbps
+    
+Protocolo adecuado para Video: UDP
+
+Para el flujo de video desde las cámaras hacia los contenedores YOLO, el protocolo más adecuado es UDP (generalmente a través de RTSP/RTP).
+
+Justificación:
+
+    Prioridad de la Latencia: En análisis de video en tiempo real, un retraso de pocos segundos puede significar que el objeto (o la persona) ya no esté en el cuadro cuando la IA procese la imagen. UDP no tiene retransmisiones; si un paquete se pierde, se descarta y se pasa al siguiente, manteniendo el flujo actualizado.
+
+Evita el "Head-of-Line Blocking": TCP garantiza la entrega en orden. Si un paquete de video se pierde debido al jitter o congestión, TCP detendrá todo el flujo hasta recuperar ese paquete, causando un "congelamiento" visual que afecta el rendimiento de YOLO.
+
+Naturaleza del Tráfico: El video es tolerante a pequeñas pérdidas (píxeles corruptos momentáneos), pero es extremadamente sensible al retardo (delay).
+
+Mitigación del Jitter en el Receptor
+
+El jitter de ±1 ms sobre una latencia de 2 ms significa que los paquetes pueden llegar en intervalos de entre 1 ms y 3 ms. Aunque parece poco, en flujos de alta tasa de bits esto puede causar desincronización.
+
+Para mitigarlo en los contenedores o en la VM, se utilizan las siguientes técnicas:
+A. Jitter Buffer (Búfer de De-jitter)
+
+Es la técnica principal. El receptor (el contenedor que corre YOLO o el cliente RTSP) almacena temporalmente los paquetes entrantes durante unos milisegundos antes de entregarlos al motor de decodificación.
+
+    Funcionamiento: Si la red entrega paquetes de forma irregular, el búfer los libera a una tasa constante (1/FPS)
+    Configuración: En este escenario, un búfer de 5-10 ms sería suficiente para absorber el jitter de ±1 ms sin añadir una latencia          perceptible para la IA.
+
+Timestamping (RTP Timestamps)
+
+Al usar UDP sobre RTP, cada paquete lleva un sello de tiempo. El receptor utiliza estos timestamps para reconstruir la secuencia temporal original del video, independientemente de cuándo llegaron físicamente los paquetes a la interfaz de red.
+
+Traffic Shaping en el Switch Virtual
+
+Dado que usas Open vSwitch o un Linux Bridge, puedes aplicar políticas de QoS (Quality of Service) para priorizar los paquetes UDP de video sobre el tráfico de metadata TCP o tráfico de gestión.
+
+
