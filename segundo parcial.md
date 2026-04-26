@@ -368,15 +368,13 @@ Este bloque prepara el entorno de Linux y Python necesario para el análisis de 
 
 <img width="1218" height="501" alt="imagen" src="https://github.com/user-attachments/assets/8f589e2d-d14e-4139-b7fa-1e4f1d386bb5" />
 
-Bloque 2: Generación de tráfico con YOLO (Paso 1)
+Bloque 2: Generación de tráfico con YOLO
 
 Este script procesa un video de prueba. Por cada objeto detectado, envía un paquete UDP a la dirección local para simular alertas de una cámara inteligente.
 
 <img width="939" height="510" alt="imagen" src="https://github.com/user-attachments/assets/57fce680-21b9-45a3-8fe2-943c86af5536" />
 
-
-
-Bloque 3: Captura y Análisis con NetFlow (Paso 2)
+Bloque 3: Captura y Análisis con NetFlow
 
 Aquí capturamos el tráfico generado y lo transformamos al formato de flujos (5-tuple).
 
