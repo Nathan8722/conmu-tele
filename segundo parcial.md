@@ -360,6 +360,60 @@ Para monitorear un contenedor, la 5-tuple se compone de:
 
 El IP Accounting es una función más ligera que NetFlow, ideal para ver rápidamente quién está consumiendo más ancho de banda en una interfaz específica (como la interfaz virtual veth de un contenedor o el bridge principal).
 
+# Parte empirica #
+
+Bloque 1: Instalación de dependencias y herramientas
+
+Este bloque prepara el entorno de Linux y Python necesario para el análisis de flujos y procesamiento de video.
+
+<img width="1218" height="501" alt="imagen" src="https://github.com/user-attachments/assets/8f589e2d-d14e-4139-b7fa-1e4f1d386bb5" />
+
+Bloque 2: Generación de tráfico con YOLO (Paso 1)
+
+Este script procesa un video de prueba. Por cada objeto detectado, envía un paquete UDP a la dirección local para simular alertas de una cámara inteligente.
+
+<img width="939" height="510" alt="imagen" src="https://github.com/user-attachments/assets/57fce680-21b9-45a3-8fe2-943c86af5536" />
+
+
+
+Bloque 3: Captura y Análisis con NetFlow (Paso 2)
+
+Aquí capturamos el tráfico generado y lo transformamos al formato de flujos (5-tuple).
+
+<img width="660" height="206" alt="imagen" src="https://github.com/user-attachments/assets/636cbb54-d78e-45d9-a8e6-dedca4a6508d" />
+
+Bloque 4: Detección de Top Talkers
+
+Este bloque utiliza Python para procesar la salida de nfdump e identificar quién genera más tráfico.
+
+<img width="749" height="435" alt="imagen" src="https://github.com/user-attachments/assets/6d8d03cd-cb8d-45c2-a74d-27c6f65ef74a" />
+
+Bloque 5: IP Accounting con iptables
+
+Simulamos contadores de router para medir el tráfico hacia el puerto de la aplicación.
+
+<img width="890" height="293" alt="imagen" src="https://github.com/user-attachments/assets/fe65e5dc-7e38-4369-b341-e77188233c73" />
+
+Bloque 6: Simulación de Anomalía
+
+Este comando genera un ataque de inundación (flood) para observar cómo impacta en las mediciones.
+
+<img width="781" height="162" alt="imagen" src="https://github.com/user-attachments/assets/21a7eb28-e7d2-4f77-8903-19b878cce7ea" />
+
+
+La 5-tuple completa: Identifica los cinco elementos del flujo capturado: IP origen, IP destino, Puerto origen, Puerto destino (5555) y Protocolo (17/UDP).
+
+Contabilización de Bytes: Ejecuta sudo iptables -L -v -n. En el ejemplo del documento, tras 30 paquetes se contabilizaron 2100 bytes.
+
+Comando de filtrado: El comando adecuado es sudo iptables -L -v -n | grep "dpt:5555" o usar filtros específicos en tcpdump para el puerto 5555.
+
+Diferenciación por aplicación: Debes analizar el Puerto Destino. Por ejemplo, el tráfico YOLO usa el puerto 5555, mientras que HTTP usa el puerto 80.
+
+Modificación para sFlow (muestreo):
+
+    Cambio en el código: Dentro del bucle while, agrega un condicional: if num_detecciones % 10 == 0: para que el comando sock.sendto solo se ejecute una vez cada diez detecciones.
+
+Ventaja en enlaces lentos: Reduce drásticamente el ancho de banda consumido por el tráfico de gestión/monitoreo, evitando que los datos de análisis saturen el canal de datos real.
 
 
 
