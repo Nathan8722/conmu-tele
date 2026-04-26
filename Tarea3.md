@@ -2,19 +2,19 @@
 
 ### Modulo 4
 
-#### Conceptos Básicos de Redes Domésticas
+Conceptos Básicos de Redes Domésticas
 
 La mayoría de las redes domésticas constan de al menos dos redes separadas. La red pública procedente del proveedor de servicios. El router está conectado a Internet. Lo más probable es que el enrutador doméstico esté equipado con funcionalidades tanto cableadas como inalámbricas.
 
-#### Tecnologías de Red en el Hogar
+Tecnologías de Red en el Hogar
 
 Las tecnologías inalámbricas utilizan ondas electromagnéticas para transportar información entre dispositivos. El espectro electromagnético incluye bandas de transmisión de radio y televisión, luz visible, rayos X y rayos gama. Algunos tipos de ondas electromagnéticas no son adecuados para transportar datos.
 
-#### Estándares Inalámbricos
+Estándares Inalámbricos
 
 El estándar IEEE 802.11 rige el entorno WLAN. Los estándares inalámbricos para redes LAN usan las bandas de frecuencia de 2.4 GHz y 5 GHz. En conjunto, estas tecnologías se conocen como Wi-Fi. La Alianza Wi-Fi (Wi-Fi Alliance) es responsable de probar los dispositivos LAN inalámbricos de diferentes fabricantes.
 
-#### Configurar un Enrutador Doméstico
+Configurar un Enrutador Doméstico
 
 Muchos enrutadores inalámbricos diseñados para el uso doméstico tienen una utilidad de configuración automática que se puede usar para configurar los ajustes básicos del enrutador. Para conectarse al enrutador mediante una conexión cableada, conecte un cable de conexión Ethernet al puerto de red de la computadora. Conecte el otro extremo a un puerto LAN del router.
 
