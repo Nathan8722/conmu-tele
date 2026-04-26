@@ -185,14 +185,14 @@ Esta regla crea un "contador" específico para el tráfico que entra y sale del 
 Configuración de la regla:
 Bash
 
-# 1. Crear una tabla para contabilidad
+1. Crear una tabla para contabilidad
 nft add table inet accounting
 
-# 2. Crear una cadena que intercepte el tráfico forward y local
+2. Crear una cadena que intercepte el tráfico forward y local
 nft add chain inet accounting detections { type filter hook input priority 0 \; }
 nft add chain inet accounting output_det { type filter hook output priority 0 \; }
 
-# 3. Agregar los contadores específicos para la subred de YOLO
+3. Agregar los contadores específicos para la subred de YOLO
 nft add rule inet accounting detections ip saddr 172.17.0.0/16 counter
 nft add rule inet accounting output_det ip daddr 172.17.0.0/16 counter
 
@@ -210,10 +210,10 @@ Si prefieres el método clásico, puedes insertar reglas en las cadenas de INPUT
 Configuración de la regla:
 Bash
 
-# Contar tráfico entrante desde el contenedor YOLO a la VM
+Contar tráfico entrante desde el contenedor YOLO a la VM
 iptables -A INPUT -s 172.17.0.0/16 -d 172.17.0.1 -m comment --comment "CONTADOR_YOLO_IN"
 
-# Contar tráfico saliente desde la VM al contenedor (ACKs, comandos)
+Contar tráfico saliente desde la VM al contenedor (ACKs, comandos)
 iptables -A OUTPUT -d 172.17.0.0/16 -s 172.17.0.1 -m comment --comment "CONTADOR_YOLO_OUT"
 
 Cómo consultar los datos:
