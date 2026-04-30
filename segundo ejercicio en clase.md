@@ -18,6 +18,8 @@ Historial de configuraciones
 
 <img width="1912" height="802" alt="image" src="https://github.com/user-attachments/assets/418c4a05-0b26-4697-a5de-858a29d76848" />
 
+Proyecto planteado
+
 Diseñar e implementar un software a partir de un prompt base, que permita:
 
 ### Generar plantillas de configuración para switches y routers Cisco y Huawei.
